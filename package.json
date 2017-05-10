@@ -9,6 +9,7 @@
   "dependencies": {
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.0",
+    "react-native-simple-login": "^1.1.0",
     "react-native-sqlite-storage": "^3.3.1"
   },
   "devDependencies": {
