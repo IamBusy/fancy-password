@@ -45,7 +45,7 @@ export default class PwdItem extends Component {
                                     }
                                     hasNavArrow={true}
                                     title={pwd.name}
-                                    titleInfo={pwd.account}
+                                    titleInfo={pwd.account.length > 10? pwd.account.substr(0,10)+'...': pwd.account}
                                 />
                             ))
                         }
