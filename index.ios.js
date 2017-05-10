@@ -12,9 +12,15 @@ import {
   View
 } from 'react-native';
 
-import SQLite from 'react-native-sqlite-storage';
-SQLite.DEBUG(true);
-SQLite.enablePromise(true);
+import sqliteFactory from './app/utils/db';
+import env from './app/env'
+
+let db = null;
+
+sqliteFactory(env.database_name)
+    .then(d=>{
+        db = d;
+    });
 
 export default class fancypassword extends Component {
   render() {
