@@ -9,7 +9,7 @@ let data = Mock.mock({
         // 属性 id 是一个自增数，起始值为 1，每次增 1
         'id|+1': 1,
         'name': () => Random.ctitle(2,4),
-        'account': () => Random.email(),
+        'username': () => Random.email(),
         'password': () => Random.string('lower/upper/number/symbol',10,20)
     }]
 })
