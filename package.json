@@ -12,13 +12,15 @@
     "react-native-action-button": "^2.6.9",
     "react-native-camera": "git+https://github.com/lwansbrough/react-native-camera.git",
     "react-native-gifted-form": "0.0.13",
+    "react-native-http-server": "^0.1.2",
     "react-native-settings-list": "^1.4.0",
     "react-native-sqlite-storage": "^3.3.1",
-    "react-native-vector-icons": "^4.1.1"
+    "react-native-vector-icons": "^4.1.1",
+    "react-navigation": "^1.0.0-beta.9"
   },
   "devDependencies": {
     "babel-jest": "20.0.0",
-    "babel-preset-react-native": "1.9.1",
+    "babel-prreact-native link react-native-http-servereset-react-native": "1.9.1",
     "jest": "20.0.0",
     "react-test-renderer": "16.0.0-alpha.6"
   },
