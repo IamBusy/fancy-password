@@ -72,8 +72,12 @@ class Server {
     }
 
     addRouter(router) {
+        for(let i=0;i< this.router.length;i++) {
+            if(this.router[i].url == router.url ) {
+                return;
+            }
+        }
         this.router.push(router);
-        console.log(this.router);
     }
 
     stop() {
