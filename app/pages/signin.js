@@ -16,7 +16,18 @@ import {
 } from 'react-native';
 
 export default class Singin extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            password: null,
+        };
+    }
+
+
+
     render(){
+        const { signin } = this.props;
+
         return (
             <View style={styles.container}>
                 <View style={{alignItems:'center',marginTop:60}}>
@@ -26,12 +37,11 @@ export default class Singin extends Component {
                     <TextInput
                         style={styles.input}
                         onChangeText={(text) => this.setState({password:text})}
-
                         placeholder={"Master Password"}
                     />
                     <Button
-                        onPress={()=>{}}
-                        title={"登录"}
+                        onPress={()=>{signin(this.state.password)}}
+                        title={"Sign in!"}
                     >
                     </Button>
                 </View>

@@ -64,3 +64,7 @@ let icons = ['browsers','bulb','bug','cafe','cloud','cloudy-night','color-fill']
 export function randomIcon() {
     return randomPick(icons);
 }
+
+export function randomPwd(min, max) {
+    return null;
+}

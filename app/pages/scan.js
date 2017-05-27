@@ -17,8 +17,27 @@ import {
 } from 'react-native';
 
 import Camera from 'react-native-camera';
+import { runOnce } from '../utils/helper';
 
 export default class QRCode extends Component {
+    static navigationOptions = {
+        title: 'QR Code',
+    };
+
+    constructor(props) {
+        super(props);
+        this.timers = [];
+        this.barCodeFlag = true;
+        this._onBarCodeRead = this._onBarCodeRead.bind(this);
+        this._onPressCancel = this._onPressCancel.bind(this);
+        const { goBack, state } = props.navigation;
+
+        this.callback = runOnce(function (result) {
+            const { onSuccess } = state.params;
+            goBack();
+            onSuccess(result.data);
+        });
+    }
 
     propTypes: {
         cancelButtonVisible: React.PropTypes.bool,
@@ -28,40 +47,25 @@ export default class QRCode extends Component {
     };
 
     _onPressCancel() {
-        var $this = this;
-        requestAnimationFrame(function() {
-            $this.props.navigator.pop();
-            if ($this.props.onCancel) {
-                $this.props.onCancel();
-            }
-        });
+        const { goBack } = this.props.navigation;
+        goBack();
     }
 
     _onBarCodeRead(result) {
-        var $this = this;
-        console.log(result);
+        const { goBack, state } = this.props.navigation;
+        console.log(result.data);
+        this.callback(result);
 
-        if (this.barCodeFlag) {
-            this.barCodeFlag = false;
-
-            setTimeout(function() {
-                VibrationIOS.vibrate();
-                $this.props.navigator.pop();
-                $this.props.onSucess(result.data);
-            }, 1000);
-        }
     }
 
     render() {
         this.barCodeFlag = true;
         return (
-            <View style={styles.container}>
-                <Camera onBarCodeRead={this._onBarCodeRead} style={styles.camera} aspect="fit">
-                    <View style={styles.rectangleContainer}>
-                        <View style={styles.rectangle}/>
-                    </View>
-                </Camera>
-            </View>
+            <Camera onBarCodeRead={this._onBarCodeRead} style={styles.camera} aspect="fit">
+                <View style={styles.rectangleContainer}>
+                    <View style={styles.rectangle}/>
+                </View>
+            </Camera>
 
         );
     }
@@ -84,6 +88,8 @@ let styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'transparent',
+        marginLeft:0,
+        paddingLeft:0,
     },
 
     rectangle: {

@@ -20,23 +20,31 @@ import {
 
 import { randomIcon } from '../utils/random';
 import passwords from '../mock/password';
+import Constant from '../constant';
 
 
-export default class PwdItem extends Component {
+export default class Main extends Component {
+    static navigationOptions = {
+        title: 'Home',
+    };
+
     constructor(props) {
         super(props);
+        this.tryScan = this.tryScan.bind(this);
+    }
+
+    tryScan(content) {
+        console.log(content);
+        const { navigate } = this.props.navigation;
+        navigate('Auth');
     }
 
     render() {
-
+        const { navigate } = this.props.navigation;
         return (
             <View style={{backgroundColor:'#EFEFF4',flex:1}}>
-                <View style={{borderBottomWidth:1, backgroundColor:'#f7f7f8',borderColor:'#c8c7cc'}}>
-                    <Text style={{alignSelf:'center',marginTop:20,marginBottom:10,fontWeight:'bold',fontSize:16}}></Text>
-                </View>
                 <View style={{backgroundColor:'#EFEFF4',flex:1}}>
                     <SettingsList borderColor='#c8c7cc' defaultItemSize={60}>
-                        <SettingsList.Header headerStyle={{marginTop:15}}/>
                         {
                             passwords.map( pwd => (
                                 <SettingsList.Item
@@ -46,16 +54,17 @@ export default class PwdItem extends Component {
                                     }
                                     hasNavArrow={true}
                                     title={pwd.name}
-                                    titleInfo={pwd.account.length > 10? pwd.account.substr(0,10)+'...': pwd.account}
+                                    onPress={() => navigate('Edit',{ account: pwd, mode: Constant.editType.EDIT })}
+                                    titleInfo={pwd.username.length > 10? pwd.username.substr(0,10)+'...': pwd.username}
                                 />
                             ))
                         }
                     </SettingsList>
                     <ActionButton buttonColor="rgba(231,76,60,1)">
-                        <ActionButton.Item buttonColor='#9b59b6' title="Add Account" onPress={() => console.log("notes tapped!")}>
+                        <ActionButton.Item buttonColor='#9b59b6' title="Add Account" onPress={() => navigate('Edit',{ mode: Constant.editType.ADD })}>
                             <Icon name="md-create" style={styles.actionButtonIcon} />
                         </ActionButton.Item>
-                        <ActionButton.Item buttonColor='#3498db' title="Scan" onPress={() => {}}>
+                        <ActionButton.Item buttonColor='#3498db' title="Scan" onPress={() => navigate('Scan',{ onSuccess: this.tryScan })}>
                             <Icon name="md-qr-scanner" style={styles.actionButtonIcon} />
                         </ActionButton.Item>
                     </ActionButton>
