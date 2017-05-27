@@ -5,6 +5,6 @@ export default {
     api     : 'http://devapi.umeishu.com/v1/',
     version : '1.0.0',
     database_name: 'fancy-password',
+    database_info: 'fancy-password-info',
     database_version: '1.0',
-
 }
