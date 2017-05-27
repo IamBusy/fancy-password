@@ -13,6 +13,7 @@
     "react-native-action-button": "^2.6.9",
     "react-native-camera": "git+https://github.com/lwansbrough/react-native-camera.git",
     "react-native-http-server": "^0.1.2",
+    "react-native-message-bar": "^1.6.0",
     "react-native-settings-list": "^1.4.0",
     "react-native-sha256": "^1.0.0",
     "react-native-sqlite-storage": "^3.3.1",
