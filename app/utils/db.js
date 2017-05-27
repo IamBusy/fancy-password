@@ -3,6 +3,8 @@
  */
 
 import SQLite from 'react-native-sqlite-storage';
+import Guardin from '../utils/guardian';
+import { randomWord } from './random';
 
 // export default function sqliteFactory(name) {
 //     return new Promise(function (resolve, reject) {
@@ -19,11 +21,24 @@ class DB {
         this.connect = this.connect.bind(this);
     }
 
-    connect(name) {
+    connect(name,pwd) {
         this.client = SQLite.openDatabase({
             name: name,
             location: 'default',
         },() => Promise.resolve(db), (err) => Promise.reject(err));
+
+        return new Promise((resolve,reject)=> {
+            this.client.executeSql('SELECT * FROM info',[], (records)=>{
+                if(records.rows.length == 0) {
+                    reject();
+                } else {
+                    Guardin.setPassword(pwd);
+                    resolve();
+                }},
+                (err)=>reject(err));
+        });
+
+
 
         // return new Promise(function (resolve, reject) {
         //     let db = SQLite.openDatabase({
@@ -33,8 +48,13 @@ class DB {
         // });
     }
 
-    create() {
+    create(pwd) {
+        let salt, encrypted_salt;
         let infoDB = this.client;
+
+        salt = randomWord(false,64,128);
+        Guardin.setPassword(pwd);
+        encrypted_salt = Guardin.encrypt(salt);
 
         infoDB.executeSql('DROP TABLE IF EXISTS info;');
         infoDB.executeSql('DROP TABLE IF EXISTS passwords;');
@@ -52,21 +72,35 @@ class DB {
             + 'encrypted_pwd TEXT, '
             + 'created_at VARCHAR(128) ); ',
             (s)=>console.log('create success',s), (e)=>console.log('create fail',e));
+
+        let created_at = new Date().toString();
+        let sql = `INSERT INTO info (salt, encrypted_salt, created_at) VALUES (${salt},${encrypted_salt},${created_at})`;
+        return new Promise((resolve, reject)=> {
+            this.client.executeSql(sql, [],
+                (success) => resolve(success),
+                (err) => reject(err));
+        });
     }
 
     queryInfo() {
         return new Promise((resolve, reject)=> {
-            this.client.executeSql('SELECT * FROM info',[],
-                (success)=>resolve(success),
+            this.client.executeSql('SELECT * FROM info',[], (records)=>{
+                    if(records.rows.length == 0) {
+                        reject();
+                    } else {
+                        resolve();
+                    }},
                 (err)=>reject(err));
         });
     }
 
-    queryPasswords() {
+    queryPasswords(pwd) {
         return new Promise((resolve, reject)=> {
-            this.client.executeSql('SELECT * FROM passwords',[],
-                (success)=>resolve(success),
-                (err)=>reject(err));
+            this.client.executeSql('SELECT * FROM passwords',[], (records)=>{
+                Guardin.setPassword(pwd);
+                processed = [];
+
+                }, (err)=>reject(err));
         });
     }
 
@@ -79,10 +113,15 @@ class DB {
     }
 
     insertPassword(pwd) {
+        let salt = pwd.salt,
+            name = pwd.name,
+            user_name = pwd.user_name,
+            encrypted_pwd = pwd.encrypted_password,
+            created_at = new Date().toString();
+
+        let sql = `UPDATE passwords SET name=${name},user_name=${user_name},encrypted_pwd=${encrypted_pwd},salt=${salt},created_at=${created_at};`;
         return new Promise((resolve, reject)=> {
-            this.client.executeSql('SELECT * FROM passwords',[],
-                (success)=>resolve(success),
-                (err)=>reject(err));
+            this.client.executeSql(sql,[],success =>resolve(success),error=>reject(error));
         });
     }
 }
