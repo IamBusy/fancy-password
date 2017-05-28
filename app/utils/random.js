@@ -38,14 +38,14 @@ export function random(min, max, num = 1) {
  * @returns Object|Array
  */
 export function randomPick(arr, num = 1) {
-    console.log(arr);
+    //console.log(arr);
     if(arr.length <= num || arr.length == 0)
     {
         return arr;
     }
 
     idxs = random(0, arr.length, num);
-    console.log(idxs);
+    //console.log(idxs);
 
     if (num == 1) {
         return arr[idxs];

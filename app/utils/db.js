@@ -24,34 +24,14 @@ class DB {
         this.queryPasswords = this.queryPasswords.bind(this);
         this.updatePassword = this.updatePassword.bind(this);
         this.insertPassword = this.insertPassword.bind(this);
+        this.hasInited = this.hasInited.bind(this);
     }
 
-    connect(name,pwd) {
+    connect(name) {
         this.client = SQLite.openDatabase({
             name: name,
             location: 'default',
         },() => {}, (err) => console.log('open database:',err));
-
-        //
-        // return new Promise((resolve,reject)=> {
-        //     this.client.executeSql('SELECT * FROM info',[], (records)=>{
-        //         if(records.rows.length == 0) {
-        //             reject();
-        //         } else {
-        //             Guardin.setPassword(pwd);
-        //             resolve();
-        //         }},
-        //         (err)=>reject(err));
-        // });
-
-
-
-        // return new Promise(function (resolve, reject) {
-        //     let db = SQLite.openDatabase({
-        //         name: name,
-        //         location: 'default',
-        //     },() => resolve(db), (err) => reject(err));
-        // });
     }
 
     create(pwd) {
@@ -63,6 +43,7 @@ class DB {
         Guardin.setPassword(pwd);
         return Guardin.encrypt(salt)
             .then(encrypted_salt=>{
+                //console.log(salt,encrypted_salt);
                 return new Promise((resolve, reject)=>{
                     infoDB.transaction(function (tx) {
                         tx.executeSql('DROP TABLE IF EXISTS info;',[]);
@@ -90,19 +71,53 @@ class DB {
     }
 
     queryInfo(pwd) {
+        // Guardin.setPassword("123");
+        // Guardin.encrypt("Text may be any length you wish, no padding is required.")
+        //     .then( encrypted => {
+        //         Guardin.setPassword("123");
+        //         console.log('test encrypted:',encrypted);
+        //         Guardin.decrypt(encrypted).then(content=>{
+        //             console.log('test decrypted',content);
+        //         })
+        //     })
+        //     // .then( content => {
+        //     //     console.log('test decrypted',content);
+        //     // });
+        // return ;
         let that = this;
         return new Promise((resolve, reject)=> {
             that.client.executeSql('SELECT * FROM info',[], (records)=>{
+                console.log(records);
                     if(records.rows.length == 0) {
                         reject();
                     } else {
                         let item = records.rows.item(0);
+                        console.log(item);
                         Guardin.setPassword(pwd);
-                        if(item.encrypted_salt != Guardin.encrypt(item.salt)) {
-                            reject();
-                        } else {
-                            resolve();
-                        }
+                        Guardin.decrypt(item.encrypted_salt)
+                            .then(salt => {
+                                console.log('decrypted salt=',salt);
+                                if(item.salt != salt) {
+                                    reject();
+                                } else {
+                                    console.log('success!!!!!!!!!');
+                                    resolve();
+                                }
+                            });
+                    }},
+                (err)=>reject(err));
+        });
+    }
+
+    hasInited() {
+        let that = this;
+        return new Promise((resolve, reject)=> {
+            that.client.executeSql('SELECT * FROM info',[], (records)=>{
+                    console.log(records);
+                    if(records.rows.length == 0) {
+                        reject();
+                    } else {
+                        resolve();
                     }},
                 (err)=>reject(err));
         });
@@ -112,7 +127,21 @@ class DB {
         return new Promise((resolve, reject)=> {
             this.client.executeSql('SELECT * FROM passwords',[], (records)=>{
                 Guardin.setPassword(pwd);
-                processed = [];
+                let processed = [];
+                let promises = [];
+                for (let i=0;i<records.length;i++) {
+                    let item = records.rows.item(i);
+                    promises.push(
+                        Guardin.decrypt(item.encrypted_pwd)
+                            .then(pwd=>{
+                                item.password = pwd;
+                                delete item.encrypted_pwd;
+                                processed.push(item);
+                            }));
+
+                }
+                Promise.all(promises)
+                    .then(resolve(processed));
 
                 }, (err)=>reject(err));
         });
