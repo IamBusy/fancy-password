@@ -2,6 +2,7 @@
  * Created by william on 10/05/2017.
  */
 import React,{ Component } from 'react';
+import { sha256 } from 'react-native-sha256';
 import {
     Animated,
     StyleSheet,
@@ -31,8 +32,9 @@ export default class Singin extends Component {
         this.infoDB = null;
 
 
-        //db.connect(env.database_name);
-        db.queryInfo().then(() => {},()=>{
+
+        db.connect(env.database_name);
+        db.hasInited().then(() => {},()=>{
             this.setState({hasBuilt: false});
         });
         // db(env.database_name).then((d)=>{
@@ -55,22 +57,22 @@ export default class Singin extends Component {
             confirm_password = this.state.confirm_password;
         console.log(password);
         console.log(confirm_password);
-        let message = null;
-        if(! password || password == '') {
-            message = 'Password is required!';
-        } else if(password != confirm_password) {
-            message = "These passwords don't match. Try again?";
-        }
-        if(message != null) {
-            MessageBarManager.showAlert({
-                title: 'Error',
-                message: message,
-                alertType: 'error',
-            });
-            return ;
-        }
+        // let message = null;
+        // if(! password || password == '') {
+        //     message = 'Password is required!';
+        // } else if(password != confirm_password) {
+        //     message = "These passwords don't match. Try again?";
+        // }
+        // if(message != null) {
+        //     MessageBarManager.showAlert({
+        //         title: 'Error',
+        //         message: message,
+        //         alertType: 'error',
+        //     });
+        //     return ;
+        // }
         const { onSignin } = this.props;
-        db.connect(env.database_name,password);
+        db.connect(env.database_name);
         db.create(password)
             .then(succ=> {
                 onSignin([]);
@@ -79,21 +81,29 @@ export default class Singin extends Component {
     }
 
     signin(pwd) {
-        const { onSignin } = this.props;
-        db.queryPasswords(pwd).then(records => {
-            onSignin(records);
-        });
-    }
+        const {onSignin} = this.props;
+        db.queryInfo(pwd)
+            .then(co => {
+                return db.queryPasswords(pwd);
+            })
+            .then(pwds => {
+                console.log('query passwords',pwds);
+                onSignin(pwds);
+            })
+            .catch(function () {
+                MessageBarManager.showAlert({
+                    title: 'Error',
+                    message: 'Password is incorrect!',
+                    alertType: 'error',
+                });
+            });
 
+    }
     componentDidMount() {
-        // Register the alert located on this master page
-        // This MessageBar will be accessible from the current (same) component, and from its child component
-        // The MessageBar is then declared only once, in your main component.
         MessageBarManager.registerMessageBar(this.refs.alert);
     }
 
     componentWillUnmount() {
-        // Remove the alert located on this master page from the manager
         MessageBarManager.unregisterMessageBar();
     }
 
@@ -118,6 +128,11 @@ export default class Singin extends Component {
                                     <Button
                                         onPress={()=>{this.signin(this.state.password)}}
                                         title={"Sign in!"}
+                                    >
+                                    </Button>
+                                    <Button
+                                        onPress={()=>{this.init(this.state.password)}}
+                                        title={"Init !"}
                                     >
                                     </Button>
                                 </View>

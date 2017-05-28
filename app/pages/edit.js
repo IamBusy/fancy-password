@@ -15,9 +15,11 @@ import {
     Button,
     TouchableHighlight
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import Constant from '../constant';
 import Input from '../components/Input';
+let MessageBarAlert = require('react-native-message-bar').MessageBar;
+let MessageBarManager = require('react-native-message-bar').MessageBarManager;
+import db from '../utils/db';
 
 
 export default class Edit extends Component {
@@ -33,6 +35,14 @@ export default class Edit extends Component {
             }
         }
     };
+
+    componentDidMount() {
+        MessageBarManager.registerMessageBar(this.refs.alert);
+    }
+
+    componentWillUnmount() {
+        MessageBarManager.unregisterMessageBar();
+    }
 
     constructor(props) {
         super(props);
@@ -55,46 +65,103 @@ export default class Edit extends Component {
 
     }
 
+    _validate(pwd) {
+        let required = (s) => {
+            return !(s=='' || s== null);
+        };
+        let showError = (msg) => {
+            MessageBarManager.showAlert({
+                title: 'Error',
+                message: msg,
+                alertType: 'error',
+            });
+        };
+        if(!required(pwd.name)) {
+            showError('Name is required');
+        } else if(!required(pwd.username)) {
+            showError('Username is required');
+        } else if(!required(pwd.password)) {
+            showError('Password is required');
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    add() {
+        if(this._validate(this.state)) {
+            const { params } = this.props.navigation.state;
+            const { goBack } = this.props.navigation;
+            db.insertPassword(this.state)
+                .then(info => {
+                    goBack();
+                    params.onAdd(info);
+                });
+        }
+
+    }
+
+    edit() {
+        if(this._validate(this.state)) {
+            const { params } = this.props.navigation.state;
+            const { goBack } = this.props.navigation;
+            db.updatePassword(this.state)
+                .then(info => {
+                    goBack();
+                    params.onEdit(this.state);
+                });
+
+        }
+    }
+
     render(){
         const { params } = this.props.navigation.state;
         return (
-            <View style={styles.container}>
-                <Input
-                    label={'Name'}
-                    value = {this.state.name}
-                />
-                <Input
-                    label={'Username'}
-                    value = {this.state.username}
-                />
-                <Input
-                    label={'Password'}
-                    value = {this.state.password}
-                />
-                <Input
-                    label={'Url'}
-                    value = {this.state.url}
-                />
-                <Input
-                    label={'Note'}
-                    value = {this.state.note}
-                />
-                {
-                    ( params && params.mode == Constant.editType.EDIT ) && (
-                        <Button
-                            style={styles.button}
-                            title="Learn More"
-                        />)
-                }
-                {
-                    ( params && params.mode == Constant.editType.ADD ) && (
-                        <Button
-                            style={styles.button}
-                            title="Learn More"
-                        />)
-                }
-
-
+            <View style={{flex:1}}>
+                <MessageBarAlert ref="alert" />
+                <View style={styles.container}>
+                    <Input
+                        label={'Name'}
+                        value = {this.state.name}
+                        onChangeText={(text) => { this.setState({name: text}) }}
+                    />
+                    <Input
+                        label={'Username'}
+                        value = {this.state.username}
+                        onChangeText={(text) => { this.setState({username: text}) }}
+                    />
+                    <Input
+                        label={'Password'}
+                        value = {this.state.password}
+                        onChangeText={(text) => { this.setState({password: text}) }}
+                    />
+                    <Input
+                        label={'Url'}
+                        value = {this.state.url}
+                        onChangeText={(text) => { this.setState({url: text}) }}
+                    />
+                    <Input
+                        label={'Note'}
+                        value = {this.state.note}
+                        onChangeText={(text) => { this.setState({note: text}) }}
+                    />
+                    {
+                        ( params && params.mode == Constant.editType.EDIT ) && (
+                            <Button
+                                style={styles.button}
+                                onPress={()=>this.edit()}
+                                title="Confirm"
+                            />)
+                    }
+                    {
+                        ( params && params.mode == Constant.editType.ADD ) && (
+                            <Button
+                                style={styles.button}
+                                onPress={()=>this.add()}
+                                title="Add"
+                            />)
+                    }
+                </View>
             </View>
         )
     }

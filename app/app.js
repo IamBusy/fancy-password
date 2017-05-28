@@ -9,39 +9,46 @@ import Scan from './pages/scan';
 import Auth from './pages/authorization';
 import { StackNavigator } from 'react-navigation';
 
-const MainApp = StackNavigator({
-    Main: { screen: Main },
-    Scan: { screen: Scan },
-    Edit: { screen: Edit },
-    Auth: { screen: Auth },
-});
 
 export default class App extends Component {
     constructor(props){
         super(props);
         this.state={
             isLoggedIn : false,
+            passwords: [],
         };
+
+        this.MainApp = null;
 
         this.trySignin = this.trySignin.bind(this);
     }
 
 
-    trySignin(masterPwd) {
+    trySignin(pwds) {
+        this.MainApp = StackNavigator({
+            Main: { screen: Main },
+            Scan: { screen: Scan },
+            Edit: { screen: Edit },
+            Auth: { screen: Auth },
+        }, {
+            initialRouteParams : {
+                passwords: pwds,
+            },
+        });
 
         this.setState({isLoggedIn:true});
     }
 
     render(){
-        let defaultName = 'Main';
-        let defaultComponent = Main;
+        let MainApp = this.MainApp;
+        console.log(MainApp);
 
         if(! this.state.isLoggedIn) {
-            return <Signin signin={this.trySignin}/>
+            return <Signin onSignin={this.trySignin}/>
         }
 
         return (
-            <MainApp/>
+            <MainApp test="test"/>
         );
 
     }

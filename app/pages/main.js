@@ -19,7 +19,6 @@ import {
 } from 'react-native';
 
 import { randomIcon } from '../utils/random';
-import passwords from '../mock/password';
 import Constant from '../constant';
 
 
@@ -31,6 +30,12 @@ export default class Main extends Component {
     constructor(props) {
         super(props);
         this.tryScan = this.tryScan.bind(this);
+        const { params } = this.props.navigation.state;
+        this.state = {
+            passwords : params.passwords,
+        };
+        this.onAddPwd = this.onAddPwd.bind(this);
+        this.onEditPwd = this.onEditPwd.bind(this);
     }
 
     tryScan(content) {
@@ -39,6 +44,36 @@ export default class Main extends Component {
         navigate('Auth');
     }
 
+    onAddPwd(pwd) {
+        let pwds = this.state.passwords;
+        pwds.push(pwd);
+        this.setState({
+            passwords:pwds,
+        });
+    }
+
+    onEditPwd(pwd) {
+        let pwds = this.state.passwords;
+        for(let i=0;i<pwds.length;i++) {
+            if(pwds[i].id == pwd.id) {
+                pwds[i] = pwd;
+            }
+        }
+        this.setState({
+            passwords:pwds,
+        });
+    }
+
+    actionToAdd(mode,info) {
+        const { navigate } = this.props.navigation;
+        navigate('Edit', {
+            mode: mode,
+            account: info,
+            onAdd:this.onAddPwd,
+            onEdit:this.onEditPwd });
+    }
+
+
     render() {
         const { navigate } = this.props.navigation;
         return (
@@ -46,22 +81,22 @@ export default class Main extends Component {
                 <View style={{backgroundColor:'#EFEFF4',flex:1}}>
                     <SettingsList borderColor='#c8c7cc' defaultItemSize={60}>
                         {
-                            passwords.map( pwd => (
+                            this.state.passwords.map( pwd => (
                                 <SettingsList.Item
-                                    key={pwd.name}
+                                    key={pwd.id}
                                     icon={
                                         <Icon name={'ios-'+randomIcon()} style={styles.imageStyle} size={35}  color="#4F8EF7" />
                                     }
                                     hasNavArrow={true}
                                     title={pwd.name}
-                                    onPress={() => navigate('Edit',{ account: pwd, mode: Constant.editType.EDIT })}
+                                    onPress={() => this.actionToAdd(Constant.editType.EDIT,pwd)}
                                     titleInfo={pwd.username.length > 10? pwd.username.substr(0,10)+'...': pwd.username}
                                 />
                             ))
                         }
                     </SettingsList>
                     <ActionButton buttonColor="rgba(231,76,60,1)">
-                        <ActionButton.Item buttonColor='#9b59b6' title="Add Account" onPress={() => navigate('Edit',{ mode: Constant.editType.ADD })}>
+                        <ActionButton.Item buttonColor='#9b59b6' title="Add Account" onPress={()=>this.actionToAdd(Constant.editType.ADD,{})}>
                             <Icon name="md-create" style={styles.actionButtonIcon} />
                         </ActionButton.Item>
                         <ActionButton.Item buttonColor='#3498db' title="Scan" onPress={() => navigate('Scan',{ onSuccess: this.tryScan })}>

@@ -18,6 +18,7 @@ import { randomWord } from './random';
 class DB {
     constructor() {
         this.client = null;
+        this.password = null;
         this.connect = this.connect.bind(this);
         this.queryInfo = this.queryInfo.bind(this);
         this.create = this.create.bind(this);
@@ -35,6 +36,7 @@ class DB {
     }
 
     create(pwd) {
+        this.password = pwd;
         let salt, encrypted_salt, created_at;
         let infoDB = this.client;
 
@@ -56,9 +58,11 @@ class DB {
                         tx.executeSql('CREATE TABLE IF NOT EXISTS passwords( '
                             + 'id INTEGER PRIMARY KEY  AUTOINCREMENT,'
                             + 'name VARCHAR(255),'
-                            + 'user_name VARCHAR(255),'
+                            + 'username VARCHAR(255),'
                             + 'salt VARCHAR(128), '
                             + 'encrypted_pwd TEXT, '
+                            + 'url VARCHAR(255),'
+                            + 'note VARCHAR(255), '
                             + 'created_at VARCHAR(128) ); ');
 
                         let sql = `INSERT INTO info (salt, encrypted_salt, created_at) VALUES ('${salt}','${encrypted_salt}','${created_at}')`;
@@ -71,19 +75,7 @@ class DB {
     }
 
     queryInfo(pwd) {
-        // Guardin.setPassword("123");
-        // Guardin.encrypt("Text may be any length you wish, no padding is required.")
-        //     .then( encrypted => {
-        //         Guardin.setPassword("123");
-        //         console.log('test encrypted:',encrypted);
-        //         Guardin.decrypt(encrypted).then(content=>{
-        //             console.log('test decrypted',content);
-        //         })
-        //     })
-        //     // .then( content => {
-        //     //     console.log('test decrypted',content);
-        //     // });
-        // return ;
+        this.password = pwd;
         let that = this;
         return new Promise((resolve, reject)=> {
             that.client.executeSql('SELECT * FROM info',[], (records)=>{
@@ -124,48 +116,83 @@ class DB {
     }
 
     queryPasswords(pwd) {
+        this.password = pwd;
         return new Promise((resolve, reject)=> {
             this.client.executeSql('SELECT * FROM passwords',[], (records)=>{
+                console.log(records);
                 Guardin.setPassword(pwd);
-                let processed = [];
+                //let processed = [];
                 let promises = [];
-                for (let i=0;i<records.length;i++) {
+                for (let i=0;i<records.rows.length;i++) {
                     let item = records.rows.item(i);
+                    //console.log('item=',item);
                     promises.push(
                         Guardin.decrypt(item.encrypted_pwd)
                             .then(pwd=>{
                                 item.password = pwd;
-                                delete item.encrypted_pwd;
-                                processed.push(item);
+                                delete item.encrypted_pwd
+                                //console.log(item);
+                                return item;
+                                //processed[i]=item;
                             }));
 
                 }
                 Promise.all(promises)
-                    .then(resolve(processed));
+                    .then(res => resolve(res));
 
                 }, (err)=>reject(err));
         });
     }
 
-    updatePassword(id, pwd) {
-        return new Promise((resolve, reject)=> {
-            this.client.executeSql('SELECT * FROM passwords',[],
-                (success)=>resolve(success),
-                (err)=>reject(err));
-        });
+    updatePassword(info) {
+        let id = info.id;
+        let salt = randomWord(false,32,64),
+            name = info.name,
+            username = info.username,
+            url = info.url,
+            note = info.note,
+            password = info.password,
+            created_at = new Date().toString();
+        return Guardin.encrypt(password)
+            .then(encrypted_pwd => {
+                let sql = `UPDATE passwords SET ` +
+                    `name='${name}',`+
+                    `username='${username}',`+
+                    `encrypted_pwd='${encrypted_pwd}',`+
+                    `url='${url}',`+
+                    `note='${note}',`+
+                    `salt='${salt}',`+
+                    `created_at='${created_at}' WHERE id = '${id}';`;
+
+                return new Promise((resolve, reject)=> {
+                    this.client.executeSql(sql,[],
+                        (success)=>resolve(success),
+                        (err)=>reject(err));
+                });
+            });
     }
 
-    insertPassword(pwd) {
-        let salt = pwd.salt,
-            name = pwd.name,
-            user_name = pwd.user_name,
-            encrypted_pwd = pwd.encrypted_password,
+    insertPassword(info) {
+        let salt = randomWord(false,32,64),
+            name = info.name,
+            username = info.username,
+            url = info.url,
+            note = info.note,
+            password = info.password,
             created_at = new Date().toString();
 
-        let sql = `UPDATE passwords SET name=${name},user_name=${user_name},encrypted_pwd=${encrypted_pwd},salt=${salt},created_at=${created_at};`;
-        return new Promise((resolve, reject)=> {
-            this.client.executeSql(sql,[],success =>resolve(success),error=>reject(error));
-        });
+        return Guardin.encrypt(password)
+            .then(encrypted_pwd => {
+                let sql = `INSERT INTO passwords (name,username,encrypted_pwd,url,note,salt,created_at)` +
+                    ` VALUES ('${name}','${username}','${encrypted_pwd}','${url}','${note}','${salt}','${created_at}');`;
+
+                return new Promise((resolve, reject)=> {
+                    this.client.executeSql(sql,[],success =>resolve({
+                        ...info,
+                        id: success.insertId
+                    }),error=>reject(error));
+                });
+            });
     }
 }
 
