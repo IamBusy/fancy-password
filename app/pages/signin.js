@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import db from '../utils/db';
+import env from '../env';
 let MessageBarAlert = require('react-native-message-bar').MessageBar;
 let MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
@@ -52,6 +53,8 @@ export default class Singin extends Component {
     init() {
         let password = this.state.password,
             confirm_password = this.state.confirm_password;
+        console.log(password);
+        console.log(confirm_password);
         let message = null;
         if(! password || password == '') {
             message = 'Password is required!';
@@ -64,10 +67,15 @@ export default class Singin extends Component {
                 message: message,
                 alertType: 'error',
             });
+            return ;
         }
         const { onSignin } = this.props;
-        //db.create(password);
-        onSignin([]);
+        db.connect(env.database_name,password);
+        db.create(password)
+            .then(succ=> {
+                onSignin([]);
+            });
+
     }
 
     signin(pwd) {
