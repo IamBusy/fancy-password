@@ -30,18 +30,21 @@ export default class Auth extends Component {
 
     // Confirm to authorize
     auth(account) {
+        const { params } = this.props.navigation.state;
         Server.start();
         Server.addRouter({
-            "url": '/token',
+            "url": '/'+params.token,
             "server": (request) => {
                 return {
-                    hello: 'world',
+                    username: params.password.username,
+                    password: params.password.password,
                 }
             }
         })
     }
 
     render(){
+        const { params } = this.props.navigation.state;
         return (
             <View style={styles.container}>
                 <View style={{alignItems:'center',marginTop:60}}>
@@ -52,11 +55,11 @@ export default class Auth extends Component {
                         You are trying to log on to
                     </Text>
                     <Text style={styles.url}>
-                        {'QQ.com'}
+                        {params.password.url}
                     </Text>
                     <Text style={{marginTop:12}} >
                         using the account:
-                        <Text style={styles.account}>{'1342247033@qq.com'}</Text>
+                        <Text style={styles.account}>{params.password.username}</Text>
                     </Text>
                 </View>
                 <View  style={{marginTop:50}}>

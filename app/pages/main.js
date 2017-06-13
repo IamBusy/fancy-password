@@ -20,6 +20,8 @@ import {
 
 import { randomIcon } from '../utils/random';
 import Constant from '../constant';
+let MessageBarAlert = require('react-native-message-bar').MessageBar;
+let MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
 
 export default class Main extends Component {
@@ -38,10 +40,23 @@ export default class Main extends Component {
         this.onEditPwd = this.onEditPwd.bind(this);
     }
 
-    tryScan(content) {
-        console.log(content);
+    tryScan(info) {
+        let website = '';
+        let token = '';
         const { navigate } = this.props.navigation;
-        navigate('Auth');
+        let password = null;
+        for(let i=0;i<this.state.passwords.length;i++) {
+            if(this.state.passwords[i].url == token) {
+                password = this.state.passwords[i];
+                break;
+            }
+        }
+        if(password != null) {
+            navigate('Auth',{
+                password,
+                token,
+            });
+        }
     }
 
     onAddPwd(pwd) {
@@ -73,11 +88,20 @@ export default class Main extends Component {
             onEdit:this.onEditPwd });
     }
 
+    componentDidMount() {
+        MessageBarManager.registerMessageBar(this.refs.alert);
+    }
+
+    componentWillUnmount() {
+        MessageBarManager.unregisterMessageBar();
+    }
+
 
     render() {
         const { navigate } = this.props.navigation;
         return (
             <View style={{backgroundColor:'#EFEFF4',flex:1}}>
+                <MessageBarAlert ref="alert" />
                 <View style={{backgroundColor:'#EFEFF4',flex:1}}>
                     <SettingsList borderColor='#c8c7cc' defaultItemSize={60}>
                         {
