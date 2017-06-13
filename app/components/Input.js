@@ -12,7 +12,7 @@ export default class Input extends React.Component {
     render() {
         return (
             <Hoshi
-                borderColor={'#4F8EF7'}
+                borderColor={'#b76c94'}
                 {...this.props}
             />
         );
