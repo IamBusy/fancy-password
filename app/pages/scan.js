@@ -35,7 +35,10 @@ export default class QRCode extends Component {
         this.callback = runOnce(function (result) {
             const { onSuccess } = state.params;
             goBack();
-            onSuccess(result.data);
+            setTimeout(function () {
+                onSuccess(result.data);
+            },0);
+            //goBack();
         });
     }
 

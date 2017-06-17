@@ -40,17 +40,20 @@ export default class Main extends Component {
         this.onEditPwd = this.onEditPwd.bind(this);
     }
 
-    tryScan(info) {
-        let website = '';
-        let token = '';
+    tryScan(data) {
+        info = JSON.parse(data);
+        let website = info.wz;
+        let token = info.token;
         const { navigate } = this.props.navigation;
         let password = null;
         for(let i=0;i<this.state.passwords.length;i++) {
-            if(this.state.passwords[i].url == token) {
+            if(this.state.passwords[i].url == website) {
                 password = this.state.passwords[i];
                 break;
             }
         }
+        // console.log(this.state.passwords);
+        // console.log(password);
         if(password != null) {
             navigate('Auth',{
                 password,
