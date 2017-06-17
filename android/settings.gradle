@@ -1,4 +1,6 @@
 rootProject.name = 'fancypassword'
+include ':react-native-network-info'
+project(':react-native-network-info').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-network-info/android')
 include ':react-native-sha256'
 project(':react-native-sha256').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sha256/android')
 include ':react-native-http-server'

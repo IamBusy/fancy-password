@@ -126,6 +126,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-network-info')
     compile project(':react-native-sha256')
     compile project(':react-native-http-server')
     compile project(':react-native-camera')

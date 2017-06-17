@@ -3,6 +3,7 @@ package com.fancypassword;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.pusherman.networkinfo.RNNetworkInfoPackage;
 import com.sha256lib.Sha256Package;
 import com.strainy.RNHttpServer.RNHttpServerReactPackage;
 import com.lwansbrough.RCTCamera.RCTCameraPackage;
@@ -29,6 +30,7 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new SQLitePluginPackage(),
           new MainReactPackage(),
+            new RNNetworkInfoPackage(),
             new Sha256Package(),
             new RNHttpServerReactPackage(),
             new RCTCameraPackage(),
