@@ -35,13 +35,22 @@ class Server {
         if( !this.istarted ) {
             let opt = {};
             Object.assign(opt,options,this.defaultOption);
-            console.log(opt);
             let deal = this.deal;
 
             httpServer.create(opt,(request, send)=> {
+
+                let dtObj = {};
+                for(let i=0;i<this.router.length;i++) {
+                    if(request.url == this.router[i].url) {
+                        dtObj = this.router[i].server(request);
+                        break;
+                    }
+                }
+
+
                 console.log(request);
-                let serveRes = deal(request);
-                let data = JSON.stringify(serveRes);
+                //let serveRes = deal(request);
+                let data = JSON.stringify(dtObj);
                 //Build our response object (you can specify status, mime_type (type), data, and response headers)
                 let res = {};
                 res.status = "OK";
