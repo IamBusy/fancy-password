@@ -57,20 +57,20 @@ export default class Singin extends Component {
             confirm_password = this.state.confirm_password;
         console.log(password);
         console.log(confirm_password);
-        // let message = null;
-        // if(! password || password == '') {
-        //     message = 'Password is required!';
-        // } else if(password != confirm_password) {
-        //     message = "These passwords don't match. Try again?";
-        // }
-        // if(message != null) {
-        //     MessageBarManager.showAlert({
-        //         title: 'Error',
-        //         message: message,
-        //         alertType: 'error',
-        //     });
-        //     return ;
-        // }
+        let message = null;
+        if(! password || password == '') {
+            message = 'Password is required!';
+        } else if(password != confirm_password) {
+            message = "These passwords don't match. Try again?";
+        }
+        if(message != null) {
+            MessageBarManager.showAlert({
+                title: 'Error',
+                message: message,
+                alertType: 'error',
+            });
+            return ;
+        }
         const { onSignin } = this.props;
         db.connect(env.database_name);
         db.create(password)
@@ -122,6 +122,7 @@ export default class Singin extends Component {
                                 <View style={{marginTop:50}}>
                                     <TextInput
                                         style={styles.input}
+                                        secureTextEntry={true}
                                         onChangeText={(text) => this.setState({password:text})}
                                         placeholder={"Master Password"}
                                     />
@@ -130,21 +131,23 @@ export default class Singin extends Component {
                                         title={"Sign in!"}
                                     >
                                     </Button>
-                                    <Button
-                                        onPress={()=>{this.init(this.state.password)}}
-                                        title={"Init !"}
-                                    >
-                                    </Button>
+                                    {/*<Button*/}
+                                        {/*onPress={()=>{this.init(this.state.password)}}*/}
+                                        {/*title={"Init !"}*/}
+                                    {/*>*/}
+                                    {/*</Button>*/}
                                 </View>
                             ):(
                                 <View style={{marginTop:50}}>
                                     <TextInput
                                         style={styles.input}
+                                        secureTextEntry={true}
                                         onChangeText={(text) => this.setState({password:text})}
                                         placeholder={"Enter Master Password"}
                                     />
                                     <TextInput
                                         style={styles.input}
+                                        secureTextEntry={true}
                                         onChangeText={(text) => this.setState({confirm_password:text})}
                                         placeholder={"Enter Master Password Again"}
                                     />
