@@ -34,9 +34,12 @@ export default class Auth extends Component {
         this.auth = this.auth.bind(this);
 
         this.is = false;
-        Request.get('mobile_linked.php',{
-            token:params.token,
-        });
+        Request.get('moblie_link.php?token='+ params.token);
+        //     .then(data => {
+        //     console.log(data);
+        // },err => {
+        //     console.log(err);
+        // });
 
         NetInfo.fetch().done(
             (connectionInfo) => { console.log('network info',connectionInfo); }
@@ -78,11 +81,8 @@ export default class Auth extends Component {
 
         NetworkInfo.getIPAddress(ip => {
             console.log('local ip:',ip);
-            Request.post('port_info.php',{
-                ip: ip,
-                port:port,
-                token: params.token,
-            }).then(() => {
+            Request.get(`port_info.php?ip=${ip}&port=${port}&token=${params.token}`).then((data) => {
+                console.log(data);
                 Server.start({port});
                 Server.addRouter({
                     "url": '/'+params.token,
